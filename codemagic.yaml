@@ -15,10 +15,10 @@ workflows:
         CI: true
       cache:
         cache_paths:
-          - ~/.npm
-          - ~/.gradle
-          - ~/.cache/expo
-          - node_modules
+          - ~/.npm/
+          - ~/.gradle/
+          - ~/.cache/expo/
+          - node_modules/
     scripts:
       - name: Clean previous build cache
         script: |
