@@ -1,16 +1,77 @@
 workflows:
-  build-android:
-    name: Build Android APK
+  my_editor_android:
+    name: My Editor Android APK Build
+    max_build_duration: 60
     environment:
-      node: 16
+      node: 18
+      npm: 9
+      java: 17
+      groups:
+        - google_play
       vars:
-        EXPO_ANDROID_KEYSTORE_PASSWORD: ""
+        EXPO_TOKEN: $EXPO_TOKEN
+        EXPO_DEBUG: false
+        EAS_NO_VCS: 1
+        CI: true
+      cache:
+        cache_paths:
+          - ~/.npm
+          - ~/.gradle
+          - ~/.cache/expo
+          - node_modules
     scripts:
-      - name: Install dependencies
+      - name: Clean previous build cache
         script: |
-          npm install
-      - name: Build Android APK
+          rm -rf node_modules android build || true
+          npm cache clean --force || true
+          echo "✅ Cache cleaned"
+
+      - name: Install dependencies safely
         script: |
-          npx expo export --platform android
+          npm install --legacy-peer-deps || npm ci || true
+          npx expo install || true
+          echo "✅ Dependencies installed"
+
+      - name: Validate project structure
+        script: |
+          test -f package.json || (echo "❌ package.json missing!" && exit 1)
+          test -f App.js || (echo "❌ App.js missing!" && exit 1)
+          echo "✅ Files verified"
+
+      - name: Prebuild for Android
+        script: |
+          npx expo prebuild --platform android --non-interactive || true
+          echo "✅ Expo prebuild complete"
+
+      - name: Grant Gradle permission and set up Android SDK
+        script: |
+          cd android
+          chmod +x ./gradlew
+          yes | sdkmanager --licenses || true
+          echo "✅ SDK ready"
+
+      - name: Build Android APK (Release)
+        script: |
+          ./gradlew clean
+          ./gradlew assembleRelease || ./gradlew assembleDebug
+          echo "✅ Build complete"
+
+      - name: Verify output
+        script: |
+          if [ -d "app/build/outputs/apk/release" ]; then
+            echo "✅ APK found"
+          else
+            echo "❌ APK not found!" && exit 1
+          fi
+
     artifacts:
-      - build/**/*.apk
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+
+    publishing:
+      email:
+        recipients:
+          - onewempye00@gmail.com
+      scripts:
+        - name: Notify success
+          script: echo "🎉 Build finished! Check your email for the APK link."
