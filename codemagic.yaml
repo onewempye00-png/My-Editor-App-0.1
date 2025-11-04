@@ -13,12 +13,7 @@ workflows:
         EXPO_DEBUG: false
         EAS_NO_VCS: 1
         CI: true
-      cache:
-        cache_paths:
-          - ~/.npm/
-          - ~/.gradle/
-          - ~/.cache/expo/
-          - node_modules/
+
     scripts:
       - name: Clean previous build cache
         script: |
