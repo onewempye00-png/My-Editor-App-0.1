@@ -8,6 +8,7 @@ workflows:
       java: 17
       android:
         image: latest
+
     scripts:
       - name: Set up Gradle wrapper permissions
         script: |
@@ -26,17 +27,3 @@ workflows:
             echo "✅ APK found at $APK_PATH"
           else
             echo "❌ APK not found"
-            exit 1
-          fi
-
-    artifacts:
-      - build/**/*.apk
-      - app/build/**/*.apk
-
-    publishing:
-      email:
-        recipients:
-          - "onewempye00@gmail.com"
-        notify:
-          success: true
-          failure: false
