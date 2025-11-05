@@ -1,0 +1,42 @@
+workflows:
+  build-android-apk:
+    name: Build Android APK
+    max_build_duration: 60
+    environment:
+      vars:
+        ANDROID_HOME: /opt/android-sdk
+      java: 17
+      android:
+        image: latest
+    scripts:
+      - name: Set up Gradle wrapper permissions
+        script: |
+          chmod +x ./gradlew
+
+      - name: Clean and build APK
+        script: |
+          ./gradlew clean
+          ./gradlew assembleRelease || ./gradlew assembleDebug
+          echo "✅ Build complete"
+
+      - name: Verify output
+        script: |
+          APK_PATH=$(find . -type f -name "*.apk" | head -n 1)
+          if [ -f "$APK_PATH" ]; then
+            echo "✅ APK found at $APK_PATH"
+          else
+            echo "❌ APK not found"
+            exit 1
+          fi
+
+    artifacts:
+      - build/**/*.apk
+      - app/build/**/*.apk
+
+    publishing:
+      email:
+        recipients:
+          - "onewempye00@gmail.com"
+        notify:
+          success: true
+          failure: false
