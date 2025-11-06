@@ -63,7 +63,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - onewempye00@gmail.com
+          -onewempye00@gmail.com
       scripts:
         - name: Notify success
           script: echo "🎉 Build finished! Check your email for the APK link."
